@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Client</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #chatBox {
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            padding: 10px;
+            overflow-y: scroll;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 5px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        #messageForm {
+            display: flex;
+            justify-content: space-between;
+            max-width: 600px;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #sendButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        #sendButton:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<h1>Chat Client</h1>
+<div id="chatBox"></div>
+<div id="messageForm">
+    <input type="text" id="messageInput" placeholder="Enter your message">
+    <button id="sendButton" onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    // Initialize EventSource to listen for server-sent events
+    const eventSource = new EventSource('/messages');
+
+    eventSource.onmessage = function(event) {
+        const chatBox = document.getElementById('chatBox');
+        const message = document.createElement('div');
+        message.className = 'message';
+        message.textContent = event.data;
+        chatBox.appendChild(message);
+        chatBox.scrollTop = chatBox.scrollHeight; // Auto scroll to the bottom
+    };
+
+    eventSource.onerror = function() {
+        console.error('Error receiving events from server.');
+    };
+
+    function sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value;
+
+        if (message.trim() === "") {
+            alert("Please enter a message.");
+            return;
+        }
+
+        // Send the message to the server using Fetch API
+        fetch('http://localhost:8080/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message: message })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to send message');
+                }
+                messageInput.value = ''; // Clear input after sending
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+            });
+    }
+</script>
+</body>
+</html>
