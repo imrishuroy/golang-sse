@@ -70,8 +70,8 @@ func sendHi(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/messages", sendHi)
-	fmt.Println("Server started at 192.168.10.117:8080")
-	err := http.ListenAndServe("192.168.10.117:8080", nil)
+	fmt.Println("Server started at :8080")
+	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		fmt.Println("Error starting the server", err)
 		return
